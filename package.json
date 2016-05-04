@@ -1,0 +1,16 @@
+{
+  "name": "node-reload",
+  "version": "0.0.1",
+  "description": "Automatically reload console on change",
+  "main": "gulpfile.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Eric Obodo",
+  "license": "MIT",
+  "private": true,
+  "dependencies": {
+    "gulp": "^3.9.1"
+  },
+  "devDependencies": {}
+}
