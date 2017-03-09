@@ -1,6 +1,6 @@
 {
   "name": "node-reload",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Configuration based file watcher/reloader for node.js",
   "main": "./bin/node-reload.js",
   "scripts": {
