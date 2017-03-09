@@ -2,9 +2,9 @@
   "name": "node-reload",
   "version": "0.0.1",
   "description": "Configuration based file watcher/reloader for node.js",
-  "main": "bin/node-reload",
+  "main": "./bin/node-reload.js",
   "scripts": {
-    "test": "./bin/nodeecho \"Error: no test specified\" && exit 1"
+    "test": "node ./bin/node-reload.js ./test/reload-config.js"
   },
   "git": "https://github.com/eobodo/node-reload",
   "author": "Eric Obodo",
@@ -14,9 +14,7 @@
     "gulp": "^3.9.1"
   },
   "devDependencies": {},
-  "bin": {
-    "node-reload": "node-reload.js"
-  },
+  "bin": "./bin/node-reload.js",
   "directories": {
     "test": "test"
   },
