@@ -1,16 +1,35 @@
 {
   "name": "node-reload",
   "version": "0.0.1",
-  "description": "Automatically reload console on change",
-  "main": "gulpfile.js",
+  "description": "Configuration based file watcher/reloader for node.js",
+  "main": "bin/node-reload",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "./bin/nodeecho \"Error: no test specified\" && exit 1"
   },
+  "git": "https://github.com/eobodo/node-reload",
   "author": "Eric Obodo",
   "license": "MIT",
-  "private": true,
   "dependencies": {
+    "glob": "^7.1.1",
     "gulp": "^3.9.1"
   },
-  "devDependencies": {}
+  "devDependencies": {},
+  "bin": {
+    "node-reload": "node-reload.js"
+  },
+  "directories": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/eobodo/node-reload.git"
+  },
+  "keywords": [
+    "watch",
+    "reload"
+  ],
+  "bugs": {
+    "url": "https://github.com/eobodo/node-reload/issues"
+  },
+  "homepage": "https://github.com/eobodo/node-reload#readme"
 }
