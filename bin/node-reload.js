@@ -1,44 +1,18 @@
 #!/usr/bin/env node
-
 'use strict';
 
-let path = require('path');
-let fs = require('fs');
-let child_process = require('child_process');
+const argv = require('minimist')(process.argv.slice(2));
+const path = require('path');
+const fs = require('fs');
+const child_process = require('child_process');
+const gulp = require('gulp');
+const glob = require('glob');
 
-let gulp = require('gulp');
-let glob = require('glob');
-
-function init() {
-  let config = require(path.resolve(process.argv[2]));
-
-  if (!config) {
-    throw new Error('Expected String path to config file');
-  }
-
-  //let argList = process.argv.slice(4, process.argv.length);
-
-  //Load config file or JSON literal
-  /*
-  if (config[0] === '{') {
-    config = JSON.parse(config);
-  } else {
-    config = JSON.parse(fs.readFileSync(config));
-  }
-  */
-
-  //Init
-  if (!config.watch || !Array.isArray(config.watch)) 
-    throw new Error('No source path found');
-
-  return config;
-}
-
-function buildCommand() {
+function buildCommand(config) {
   let command = '';
-
   let count = 0;
   let keys = Object.keys(config.args);
+
   for (let c of keys) {
     let value = config.args[c];
 
@@ -59,13 +33,12 @@ function buildCommand() {
     linux: 'clear;',
   };
 
-  command = `${commandPrefix[platform]} ${process.argv[0]} ${config.entry} ${command}`;
+  command = `${commandPrefix[process.platform]} ${process.argv[0]} ${config.entry} ${command}`;
 
   return command;
-
 }
 
-function buildWatchList() {
+function buildWatchList(config) {
   //Resolve files to watch
   let watchList = [];
 
@@ -78,51 +51,71 @@ function buildWatchList() {
 }
 
 function relogger(logMsg) {
-  if (config.log)
+  if (configRef.log)
     console.log(logMsg);
 }
 
-let proc;
-let pid = undefined;
-let platform = process.platform;
+function loadConfig(argv) {
+  if (argv._.length === 0) {
+    throw new Error('Expected path to config file');
+  }
 
-let config = init();
-let command = buildCommand();
-let watchList = buildWatchList();
+  let configPath = path.resolve(argv._[0]);
+  let config = require(configPath);
 
-let options = {
-  stdio: [process.stdin, 'pipe', 'pipe'],
-  shell: [(platform !== 'win32') ? true : false],
-};
+  if (!config.entry || typeof config.entry !== 'string')
+    throw new Error('Config file must contain an "entry" property with String as value');
 
-//Run Gulp
-console.log(`Watching: ${watchList.length} files\n`);
+  if (!config.watch || !Array.isArray(config.watch)) 
+    throw new Error('Config file must contain a "watch" property with Array as value');
 
-gulp.task('default', ['start-process']);
+  //Add entry to watch list
+  config.watch.push(config.entry)
 
-gulp.task('start-process', ['kill-process'], (cb) => {
-  relogger(`Current process id: ${pid}`);
+  return config;
+}
 
-  proc = child_process.spawn(command, [], options);
-  pid = proc.pid;
-  proc.stdout.pipe(process.stdout);
-  proc.stderr.pipe(process.stdout);
+let configRef;
 
-  proc.on('close', (data) => {
-    relogger(`\n*** Reload success *** \n`);
+(function () {
+  let config = loadConfig(argv);
+  let command = buildCommand(config);
+
+  let watchList = buildWatchList(config);
+  configRef = config;
+
+  let options = {
+    stdio: [process.stdin, 'pipe', 'pipe'],
+    shell: [(process.platform !== 'win32') ? true : false],
+  };
+
+  let proc;
+  let pid = undefined;
+
+  //Run Gulp
+  console.log(`Watching: ${watchList.length} files\n`);
+
+  gulp.task('start-process', ['kill-process'], (cb) => {
+    proc = child_process.spawn(command, [], options);
+    proc.stdout.pipe(process.stdout);
+    proc.stderr.pipe(process.stdout);
+
+    relogger(`Current process id: ${proc.pid}\n`);
+
+    proc.on('exit', (signal) => {
+      relogger(`\n*** Reload success *** \n`);
+    });
+
+    cb();
   });
 
-  cb();
-});
+  gulp.task('kill-process', (cb) => {
+    if (proc !== undefined) {
+      proc.kill();
+    }
 
-gulp.task('kill-process', (cb) => {
-  relogger(`Killing previous process id: ${pid}`);
-  relogger(`\n*** Reload complete *** \n`);
+    cb();
+  });
 
-  if (proc !== undefined) 
-    proc.kill();
-
-  cb();
-});
-
-gulp.watch(config.watch, ['start-process']);
+  gulp.watch(config.watch, ['start-process']);
+})();

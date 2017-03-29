@@ -5,9 +5,10 @@ let basedir = '.';
 let config = {
   "entry": path.join(basedir, 'test/main.js'),
   "args": {
-    'h': undefined,
+    'a': 1,
+    'l': 'load',
   },
-  "watch": ["./*.js", "./test/*.js"],
+  "watch": ["./test/*.js"],
   "log": true,
 };
 
